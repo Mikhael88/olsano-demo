@@ -382,6 +382,79 @@
       });
     });
 
+    // ─── Color presets ────────────────────────────────────────────────────────────
+    const COLOR_PRESETS = [
+      '#8b5e3c',
+      '#2c5f2e',
+      '#1b4f72',
+      '#7b241c',
+      '#f0e6d3',
+      '#2c2c2c',
+    ];
+
+    function buildColorPanel() {
+      colorPanel.innerHTML = '';
+
+      COLOR_PRESETS.forEach(hex => {
+        const swatch = document.createElement('button');
+        swatch.className = 'preset-swatch';
+        swatch.style.background = hex;
+        swatch.setAttribute('aria-label', hex);
+        swatch.addEventListener('click', () => {
+          setColor(hex);
+          closeColorPanel();
+        });
+        colorPanel.appendChild(swatch);
+      });
+
+      const divider = document.createElement('div');
+      divider.className = 'panel-divider';
+      colorPanel.appendChild(divider);
+
+      const customBtn = document.createElement('button');
+      customBtn.id = 'custom-btn';
+      customBtn.textContent = 'Custom';
+      customBtn.addEventListener('click', () => {
+        colorInput.click();
+      });
+      colorPanel.appendChild(customBtn);
+    }
+
+    buildColorPanel();
+
+    // ─── Color logic ──────────────────────────────────────────────────────────────
+    function setColor(hex) {
+      activeColor = hex;
+      colorPreview.style.background = hex;
+      colorInput.value = hex;
+      applyMaterial(activeMat, hex);
+    }
+
+    function openColorPanel() {
+      if (activeMat in LOCKED_COLORS) return;
+      colorPanel.hidden = false;
+    }
+
+    function closeColorPanel() {
+      colorPanel.hidden = true;
+    }
+
+    colorDot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeMat in LOCKED_COLORS) return;
+      colorPanel.hidden ? openColorPanel() : closeColorPanel();
+    });
+
+    colorInput.addEventListener('input', () => {
+      setColor(colorInput.value);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!colorPanel.hidden && !colorPanel.contains(e.target) && e.target !== colorDot) {
+        closeColorPanel();
+      }
+    });
+
     // ─── Renderer ────────────────────────────────────────────────────────────────
     const renderer = new WebGPURenderer({ antialias: true, canvas });
     await renderer.init();
