@@ -368,6 +368,20 @@
       });
     }
 
+    // ─── Tab switching ────────────────────────────────────────────────────────────
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        activeMat = tab.dataset.mat;
+
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        colorDot.classList.toggle('locked', activeMat in LOCKED_COLORS);
+
+        applyMaterial(activeMat, activeColor);
+      });
+    });
+
     // ─── Renderer ────────────────────────────────────────────────────────────────
     const renderer = new WebGPURenderer({ antialias: true, canvas });
     await renderer.init();
