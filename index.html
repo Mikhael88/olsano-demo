@@ -200,18 +200,6 @@
       transition: background 0.15s ease;
     }
 
-    /* Lock overlay when Terracotta active */
-    #color-dot.locked { cursor: default; }
-    #color-dot.locked #color-preview::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.55)
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
-        center / 10px no-repeat;
-    }
-
     /* Color preset panel — sits above pill */
     #color-panel {
       background: rgba(255, 255, 255, 0.92);
@@ -284,7 +272,6 @@
         <button class="tab active" data-mat="matte">Matte</button>
         <button class="tab" data-mat="glass">Glass</button>
         <button class="tab" data-mat="polished">Polished</button>
-        <button class="tab" data-mat="terracotta">Terracotta</button>
         <div class="pill-divider"></div>
         <button id="color-dot" aria-label="Pick colour">
           <div id="color-preview"></div>
@@ -325,14 +312,15 @@
         metalness: 0.0,
       },
       glass: {
-        roughness: 0.05,
+        roughness: 0.0,
         metalness: 0.0,
-        transmission: 0.92,
-        thickness: 0.5,
-        ior: 1.5,
+        transmission: 1.0,
+        thickness: 2.0,
+        ior: 1.52,
         transparent: true,
         side: THREE.DoubleSide,
-        attenuationDistance: 0.3,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.0,
       },
       polished: {
         roughness: 0.08,
@@ -340,21 +328,17 @@
         clearcoat: 1.0,
         clearcoatRoughness: 0.05,
       },
-      terracotta: {
-        roughness: 0.90,
-        metalness: 0.0,
-      },
     };
 
-    // Colors locked per preset — ignores activeColor when set
-    const LOCKED_COLORS = {
-      terracotta: '#b5611a',
-    };
+    const LOCKED_COLORS = {};
 
     function applyMaterial(matKey, hexColor) {
       if (!gltfScene) return;
       const preset     = MATERIAL_PRESETS[matKey];
       const colorValue = LOCKED_COLORS[matKey] ?? hexColor;
+
+      // Transmission needs a background to refract through
+      scene.background = (matKey === 'glass') ? new THREE.Color('#e8e0d5') : null;
 
       gltfScene.traverse((node) => {
         if (!node.isMesh) return;
@@ -461,8 +445,8 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMapping = THREE.AgXToneMapping;
+    renderer.toneMappingExposure = 1.0;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearAlpha(0);
 
