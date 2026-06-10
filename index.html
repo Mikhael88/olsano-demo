@@ -292,7 +292,64 @@
     <input type="color" id="color-input" value="#8b5e3c">
   </div>
   <script type="module">
-    /* JS added in Tasks 2 – 9 */
+    import * as THREE from 'three';
+    import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    // ─── DOM refs ────────────────────────────────────────────────────────────────
+    const canvas     = document.getElementById('canvas');
+    const loaderEl   = document.getElementById('loader');
+    const errorEl    = document.getElementById('error');
+    const controlsEl = document.getElementById('controls');
+    const hintEl     = document.getElementById('hint');
+    const colorPreview = document.getElementById('color-preview');
+    const colorPanel   = document.getElementById('color-panel');
+    const colorDot     = document.getElementById('color-dot');
+    const colorInput   = document.getElementById('color-input');
+    const tabs         = document.querySelectorAll('.tab');
+
+    // ─── State ───────────────────────────────────────────────────────────────────
+    let activeMat   = 'matte';
+    let activeColor = '#8b5e3c';
+    let gltfScene   = null;
+
+    // ─── Renderer ────────────────────────────────────────────────────────────────
+    const renderer = new WebGPURenderer({ antialias: true, canvas });
+    await renderer.init();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    // ─── Scene + Camera ──────────────────────────────────────────────────────────
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
+    camera.position.set(0, 0.5, 3);
+
+    // ─── Controls ────────────────────────────────────────────────────────────────
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 0.5;
+    controls.maxDistance = 8;
+    controls.autoRotate = false;
+
+    // ─── Resize ──────────────────────────────────────────────────────────────────
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ─── Render loop ─────────────────────────────────────────────────────────────
+    renderer.setAnimationLoop(() => {
+      controls.update();
+      renderer.render(scene, camera);
+    });
   </script>
 </body>
 </html>
