@@ -404,6 +404,53 @@
       controls.update();
       renderer.render(scene, camera);
     });
+
+    // ─── Camera auto-fit ─────────────────────────────────────────────────────────
+    function fitCamera(object) {
+      const box    = new THREE.Box3().setFromObject(object);
+      const size   = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const fov    = camera.fov * (Math.PI / 180);
+      const dist   = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.6;
+
+      camera.position.set(center.x, center.y + size.y * 0.1, center.z + dist);
+      camera.near = dist / 100;
+      camera.far  = dist * 10;
+      camera.updateProjectionMatrix();
+
+      controls.target.copy(center);
+      controls.update();
+    }
+
+    // ─── GLB Loader ──────────────────────────────────────────────────────────────
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
+    gltfLoader.load(
+      './.glb-file/watering-can.glb',
+      (gltf) => {
+        gltfScene = gltf.scene;
+        scene.add(gltfScene);
+        fitCamera(gltfScene);
+        applyMaterial(activeMat, activeColor);
+        colorPreview.style.background = activeColor;
+
+        // Hide loader, show controls + hint
+        loaderEl.hidden = true;
+        controlsEl.classList.add('visible');
+        hintEl.classList.add('visible');
+      },
+      undefined,
+      (_err) => {
+        loaderEl.hidden = true;
+        errorEl.hidden = false;
+      }
+    );
   </script>
 </body>
 </html>
