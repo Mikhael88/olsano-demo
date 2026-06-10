@@ -380,6 +380,27 @@
 
     // ─── Scene + Camera ──────────────────────────────────────────────────────────
     const scene  = new THREE.Scene();
+
+    // ─── Environment (PBR ambient lighting) ──────────────────────────────────────
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const roomEnv = new RoomEnvironment();
+    const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
+    scene.environment = envTexture;
+    roomEnv.dispose();
+    pmremGenerator.dispose();
+
+    // Transparent background — let CSS gradient show through
+    scene.background = null;
+
+    // ─── Directional key light ────────────────────────────────────────────────────
+    const keyLight = new THREE.DirectionalLight(0xfff8f0, 1.6);
+    keyLight.position.set(2, 3, 2);
+    scene.add(keyLight);
+
+    // ─── Fill light ──────────────────────────────────────────────────────────────
+    const fillLight = new THREE.AmbientLight(0xf0e8e0, 0.5);
+    scene.add(fillLight);
+
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
     camera.position.set(0, 0.5, 3);
 
