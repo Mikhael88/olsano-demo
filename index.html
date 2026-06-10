@@ -286,7 +286,7 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
     // ─── DOM refs ────────────────────────────────────────────────────────────────
     const canvas     = document.getElementById('canvas');
@@ -455,12 +455,13 @@
 
     // ─── Environment (PBR ambient lighting) ──────────────────────────────────────
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const roomEnv = new RoomEnvironment();
-    const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
-    scene.environment = envTexture;
-    scene.environmentIntensity = 1.0;
-    roomEnv.dispose();
-    pmremGenerator.dispose();
+    pmremGenerator.compileEquirectangularShader();
+    new RGBELoader().load('./models/lighting.hdr', (hdr) => {
+      scene.environment = pmremGenerator.fromEquirectangular(hdr).texture;
+      scene.environmentIntensity = 1.0;
+      hdr.dispose();
+      pmremGenerator.dispose();
+    });
 
     // Transparent background — let CSS gradient show through
     scene.background = null;
