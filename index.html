@@ -575,6 +575,11 @@
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
 
+    // Diagnostic: verify GLB is reachable before loading
+    fetch('./models/watering-can.glb', { method: 'HEAD' })
+      .then(r => console.log('[diag] GLB HEAD:', r.status, r.ok))
+      .catch(e => console.error('[diag] GLB HEAD failed:', e));
+
     gltfLoader.load(
       './models/watering-can.glb',
       (gltf) => {
@@ -592,7 +597,8 @@
         hintEl.classList.add('visible');
       },
       undefined,
-      (_err) => {
+      (err) => {
+        console.error('GLB load failed:', err);
         loaderEl.hidden = true;
         errorEl.hidden = false;
       }
