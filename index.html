@@ -458,7 +458,7 @@
     pmremGenerator.compileEquirectangularShader();
     new RGBELoader().load('./models/lighting.hdr', (hdr) => {
       scene.environment = pmremGenerator.fromEquirectangular(hdr).texture;
-      scene.environmentIntensity = 1.0;
+      scene.environmentIntensity = 1.5;
       hdr.dispose();
       pmremGenerator.dispose();
     });
