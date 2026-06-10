@@ -23,7 +23,6 @@
     #app {
       position: relative;
       width: 100vw;
-      height: 100dvh;
       min-height: 100dvh;
       background: radial-gradient(ellipse at 40% 35%, #f0ebe3 0%, #e0d8ce 55%, #c8c0b4 100%);
     }
@@ -332,6 +331,7 @@
         ior: 1.5,
         transparent: true,
         side: THREE.DoubleSide,
+        attenuationDistance: 0.3,
       },
       polished: {
         roughness: 0.08,
@@ -364,7 +364,6 @@
         }
         node.material = new THREE.MeshPhysicalMaterial({
           color: new THREE.Color(colorValue),
-          envMapIntensity: 1.0,
           ...preset,
         });
       });
@@ -475,6 +474,7 @@
     const roomEnv = new RoomEnvironment();
     const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
     scene.environment = envTexture;
+    scene.environmentIntensity = 1.0;
     roomEnv.dispose();
     pmremGenerator.dispose();
 
