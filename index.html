@@ -44,7 +44,7 @@
       font-weight: 500;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(60, 50, 40, 0.55);
+      color: rgba(228, 210, 185, 0.85);
       pointer-events: none;
       z-index: 10;
     }
@@ -58,7 +58,7 @@
       font-size: 10px;
       font-weight: 300;
       letter-spacing: 0.12em;
-      color: rgba(60, 50, 40, 0.35);
+      color: rgba(210, 190, 165, 0.55);
       pointer-events: none;
       z-index: 10;
       opacity: 0;
@@ -104,7 +104,7 @@
       align-items: center;
       justify-content: center;
       font-size: 13px;
-      color: rgba(60, 50, 40, 0.45);
+      color: rgba(210, 190, 165, 0.60);
       letter-spacing: 0.06em;
       pointer-events: none;
       z-index: 20;
@@ -138,14 +138,13 @@
       display: flex;
       align-items: center;
       gap: 2px;
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(42, 35, 28, 0.82);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 240, 220, 0.10);
       box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.10),
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        0 8px 32px rgba(0, 0, 0, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.20);
       border-radius: 100px;
       padding: 7px 10px;
       white-space: nowrap;
@@ -158,19 +157,19 @@
       padding: 5px 13px;
       border-radius: 100px;
       letter-spacing: 0.02em;
-      color: #666;
+      color: rgba(210, 190, 162, 0.78);
       background: transparent;
       border: none;
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    .tab:hover:not(.active) { background: rgba(0, 0, 0, 0.05); }
-    .tab.active { background: #1a1a1a; color: #fff; }
+    .tab:hover:not(.active) { background: rgba(255, 255, 255, 0.07); }
+    .tab.active { background: rgba(210, 190, 162, 0.18); color: #e8d5b5; }
 
     .pill-divider {
       width: 1px; height: 18px;
-      background: rgba(0, 0, 0, 0.10);
+      background: rgba(255, 240, 220, 0.15);
       margin: 0 6px;
       flex-shrink: 0;
     }
@@ -202,13 +201,12 @@
 
     /* Color preset panel — sits above pill */
     #color-panel {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(42, 35, 28, 0.88);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 240, 220, 0.10);
       box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.10),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        0 8px 32px rgba(0, 0, 0, 0.35);
       border-radius: 16px;
       padding: 10px 12px;
       display: flex;
@@ -231,15 +229,15 @@
       box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
     }
 
-    .panel-divider { width: 1px; height: 18px; background: rgba(0,0,0,0.10); margin: 0 2px; }
+    .panel-divider { width: 1px; height: 18px; background: rgba(255,240,220,0.15); margin: 0 2px; }
 
     #custom-btn {
       font-family: 'Outfit', sans-serif;
       font-size: 10px;
       font-weight: 500;
-      color: #666;
+      color: rgba(210, 190, 162, 0.78);
       background: transparent;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 240, 220, 0.18);
       border-radius: 100px;
       padding: 3px 10px;
       cursor: pointer;
@@ -247,7 +245,7 @@
       transition: background 0.15s ease;
     }
 
-    #custom-btn:hover { background: rgba(0, 0, 0, 0.04); }
+    #custom-btn:hover { background: rgba(255, 255, 255, 0.07); }
     #pill, #color-panel { touch-action: manipulation; }
 
     /* Hidden native color input — triggered programmatically */
