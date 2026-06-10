@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olsano</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://esm.sh/three@0.170.0",
+      "three/addons/": "https://esm.sh/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Outfit', sans-serif; }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      min-height: 100dvh;
+      background: radial-gradient(ellipse at 40% 35%, #f0ebe3 0%, #e0d8ce 55%, #c8c0b4 100%);
+    }
+
+    #canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Brand label */
+    #brand {
+      position: absolute;
+      top: 24px; left: 28px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(60, 50, 40, 0.55);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Orbit hint — fades out automatically via animation */
+    #hint {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: rgba(60, 50, 40, 0.35);
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    #hint.visible {
+      animation: fadeHint 4s ease forwards;
+    }
+
+    @keyframes fadeHint {
+      0%   { opacity: 0; }
+      15%  { opacity: 1; }
+      70%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Loading spinner */
+    #loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid rgba(200, 184, 154, 0.3);
+      border-top-color: #c8b89a;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error state */
+    #error {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: rgba(60, 50, 40, 0.45);
+      letter-spacing: 0.06em;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    /* Controls wrapper — hidden until model loads */
+    #controls {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
+    }
+
+    #controls.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Floating pill */
+    #pill {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.10),
+        0 2px 8px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border-radius: 100px;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
+    .tab {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 13px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+      color: #666;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .tab:hover:not(.active) { background: rgba(0, 0, 0, 0.05); }
+    .tab.active { background: #1a1a1a; color: #fff; }
+
+    .pill-divider {
+      width: 1px; height: 18px;
+      background: rgba(0, 0, 0, 0.10);
+      margin: 0 6px;
+      flex-shrink: 0;
+    }
+
+    /* Color dot button */
+    #color-dot {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      padding: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    #color-preview {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #8b5e3c;
+      border: 2.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.15);
+      transition: background 0.15s ease;
+    }
+
+    /* Lock overlay when Terracotta active */
+    #color-dot.locked { cursor: default; }
+    #color-dot.locked #color-preview::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.55)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+        center / 10px no-repeat;
+    }
+
+    /* Color preset panel — sits above pill */
+    #color-panel {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-swatch {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .preset-swatch:hover {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-divider { width: 1px; height: 18px; background: rgba(0,0,0,0.10); margin: 0 2px; }
+
+    #custom-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: #666;
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 100px;
+      padding: 3px 10px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.15s ease;
+    }
+
+    #custom-btn:hover { background: rgba(0, 0, 0, 0.04); }
+
+    /* Hidden native color input — triggered programmatically */
+    #color-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 0; height: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="canvas"></canvas>
+    <div id="brand">Olsano</div>
+    <div id="hint">Orbit &middot; Zoom</div>
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="error" hidden>Could not load model</div>
+    <div id="controls">
+      <div id="color-panel" hidden></div>
+      <div id="pill">
+        <button class="tab active" data-mat="matte">Matte</button>
+        <button class="tab" data-mat="glass">Glass</button>
+        <button class="tab" data-mat="polished">Polished</button>
+        <button class="tab" data-mat="terracotta">Terracotta</button>
+        <div class="pill-divider"></div>
+        <button id="color-dot" aria-label="Pick colour">
+          <div id="color-preview"></div>
+        </button>
+      </div>
+    </div>
+    <input type="color" id="color-input" value="#8b5e3c">
+  </div>
+  <script type="module">
+    /* JS added in Tasks 2 – 9 */
+  </script>
+</body>
+</html>
