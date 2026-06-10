@@ -98,9 +98,9 @@
 
     /* Error state */
     #error {
+      display: none;
       position: absolute;
       inset: 0;
-      display: flex;
       align-items: center;
       justify-content: center;
       font-size: 13px;
@@ -109,6 +109,7 @@
       pointer-events: none;
       z-index: 20;
     }
+    #error.visible { display: flex; }
 
     /* Controls wrapper — hidden until model loads */
     #controls {
@@ -592,7 +593,7 @@
       console.log('[dbg] blob ok:', _glbUrl.slice(0,30));
     } catch(e) {
       errorEl.textContent = 'Blob error: ' + e.message;
-      errorEl.hidden = false;
+      errorEl.classList.add('visible');
       loaderEl.hidden = true;
       throw e;
     }
@@ -618,7 +619,7 @@
         console.error('GLB load failed:', err);
         errorEl.textContent = 'GLB error: ' + (err?.message || JSON.stringify(err));
         loaderEl.hidden = true;
-        errorEl.hidden = false;
+        errorEl.classList.add('visible');
       }
     );
   </script>
