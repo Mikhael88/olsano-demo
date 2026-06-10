@@ -24,7 +24,7 @@
       position: relative;
       width: 100vw;
       min-height: 100dvh;
-      background: radial-gradient(ellipse at 40% 35%, #f0ebe3 0%, #e0d8ce 55%, #c8c0b4 100%);
+      background: #5c5346;
     }
 
     #canvas {
@@ -338,7 +338,7 @@
       const colorValue = LOCKED_COLORS[matKey] ?? hexColor;
 
       // Transmission needs a background to refract through
-      scene.background = (matKey === 'glass') ? new THREE.Color('#e8e0d5') : null;
+      scene.background = (matKey === 'glass') ? new THREE.Color('#5c5346') : null;
 
       gltfScene.traverse((node) => {
         if (!node.isMesh) return;
