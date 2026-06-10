@@ -445,6 +445,40 @@
       controls.update();
     }
 
+    // ─── Ground shadow ────────────────────────────────────────────────────────────
+    function createGroundShadow(object) {
+      const box    = new THREE.Box3().setFromObject(object);
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+      const radius = Math.max(size.x, size.z) * 0.7;
+
+      const res = 256;
+      const shadowCanvas = document.createElement('canvas');
+      shadowCanvas.width = shadowCanvas.height = res;
+      const ctx = shadowCanvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(res/2, res/2, 0, res/2, res/2, res/2);
+      gradient.addColorStop(0,   'rgba(0,0,0,0.22)');
+      gradient.addColorStop(0.6, 'rgba(0,0,0,0.08)');
+      gradient.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, res, res);
+
+      const texture = new THREE.CanvasTexture(shadowCanvas);
+      const mesh = new THREE.Mesh(
+        new THREE.CircleGeometry(radius, 48),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        })
+      );
+
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(center.x, box.min.y + 0.001, center.z);
+      return mesh;
+    }
+
     // ─── GLB Loader ──────────────────────────────────────────────────────────────
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -457,6 +491,8 @@
       (gltf) => {
         gltfScene = gltf.scene;
         scene.add(gltfScene);
+        const shadowMesh = createGroundShadow(gltfScene);
+        scene.add(shadowMesh);
         fitCamera(gltfScene);
         applyMaterial(activeMat, activeColor);
         colorPreview.style.background = activeColor;
