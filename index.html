@@ -316,6 +316,58 @@
     let activeColor = '#8b5e3c';
     let gltfScene   = null;
 
+    // ─── Material presets ─────────────────────────────────────────────────────────
+    const MATERIAL_PRESETS = {
+      matte: {
+        roughness: 0.85,
+        metalness: 0.0,
+      },
+      glass: {
+        roughness: 0.05,
+        metalness: 0.0,
+        transmission: 0.92,
+        thickness: 0.5,
+        ior: 1.5,
+        transparent: true,
+        side: THREE.DoubleSide,
+      },
+      polished: {
+        roughness: 0.08,
+        metalness: 0.0,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+      },
+      terracotta: {
+        roughness: 0.90,
+        metalness: 0.0,
+      },
+    };
+
+    // Colors locked per preset — ignores activeColor when set
+    const LOCKED_COLORS = {
+      terracotta: '#b5611a',
+    };
+
+    function applyMaterial(matKey, hexColor) {
+      if (!gltfScene) return;
+      const preset     = MATERIAL_PRESETS[matKey];
+      const colorValue = LOCKED_COLORS[matKey] ?? hexColor;
+
+      gltfScene.traverse((node) => {
+        if (!node.isMesh) return;
+        if (node.material) {
+          Array.isArray(node.material)
+            ? node.material.forEach(m => m.dispose())
+            : node.material.dispose();
+        }
+        node.material = new THREE.MeshPhysicalMaterial({
+          color: new THREE.Color(colorValue),
+          envMapIntensity: 1.0,
+          ...preset,
+        });
+      });
+    }
+
     // ─── Renderer ────────────────────────────────────────────────────────────────
     const renderer = new WebGPURenderer({ antialias: true, canvas });
     await renderer.init();
