@@ -581,9 +581,21 @@
       .then(r => console.log('[diag] GLB HEAD:', r.status, r.ok))
       .catch(e => console.error('[diag] GLB HEAD failed:', e));
 
-    const _b64 = document.getElementById('glb-data').textContent;
-    const _bytes = Uint8Array.from(atob(_b64), c => c.charCodeAt(0));
-    const _glbUrl = URL.createObjectURL(new Blob([_bytes.buffer], { type: 'model/gltf-binary' }));
+    let _glbUrl;
+    try {
+      const _b64 = document.getElementById('glb-data').textContent.trim();
+      console.log('[dbg] b64 len:', _b64.length);
+      const _binStr = atob(_b64);
+      const _buf = new Uint8Array(_binStr.length);
+      for (let i = 0; i < _binStr.length; i++) _buf[i] = _binStr.charCodeAt(i);
+      _glbUrl = URL.createObjectURL(new Blob([_buf], { type: 'model/gltf-binary' }));
+      console.log('[dbg] blob ok:', _glbUrl.slice(0,30));
+    } catch(e) {
+      errorEl.textContent = 'Blob error: ' + e.message;
+      errorEl.hidden = false;
+      loaderEl.hidden = true;
+      throw e;
+    }
 
     gltfLoader.load(
       _glbUrl,
@@ -604,6 +616,7 @@
       undefined,
       (err) => {
         console.error('GLB load failed:', err);
+        errorEl.textContent = 'GLB error: ' + (err?.message || JSON.stringify(err));
         loaderEl.hidden = true;
         errorEl.hidden = false;
       }
